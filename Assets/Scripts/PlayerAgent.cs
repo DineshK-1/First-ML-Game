@@ -21,18 +21,21 @@ public class PlayerAgent : Agent
     private float moveSpeed=.5f;
 
     private float previousDistance;
+    private float distanceBwTarget;
 
     public override void OnEpisodeBegin()
     {
         transform.localPosition = new Vector3(Random.Range(-8.6f, 19.35f), 15.30216f, Random.Range(-3.82f, 22.5f));
 
         target.transform.localPosition = new Vector3(Random.Range(-8.6f, 19.35f), 15.30216f, Random.Range(-3.82f, 22.5f));
+        distanceBwTarget = Vector3.Distance(transform.localPosition, target.transform.localPosition);
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
         sensor.AddObservation(targetPos.localPosition);
+        sensor.AddObservation(distanceBwTarget);
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
