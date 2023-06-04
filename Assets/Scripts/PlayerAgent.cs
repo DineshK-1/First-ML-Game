@@ -18,24 +18,24 @@ public class PlayerAgent : Agent
     [SerializeField] private Material success;
     [SerializeField] private Material failure;
 
-    private float moveSpeed=.5f;
+    private float moveSpeed=5f;
 
-    private float previousDistance;
-    private float distanceBwTarget;
+    private float previousDistance = 0;
 
     public override void OnEpisodeBegin()
     {
-        transform.localPosition = new Vector3(Random.Range(-8.6f, 19.35f), 15.30216f, Random.Range(-3.82f, 22.5f));
-
-        target.transform.localPosition = new Vector3(Random.Range(-8.6f, 19.35f), 15.30216f, Random.Range(-3.82f, 22.5f));
-        distanceBwTarget = Vector3.Distance(transform.localPosition, target.transform.localPosition);
+        transform.localPosition = new Vector3(Random.Range(-8f, 19f), 15.30216f, Random.Range(-3f, 22f));
+        target.transform.localPosition = new Vector3(Random.Range(-8f, 19f), 15.30216f, Random.Range(-3f, 22f));
     }
 
     public override void CollectObservations(VectorSensor sensor)
     {
         sensor.AddObservation(transform.localPosition);
         sensor.AddObservation(targetPos.localPosition);
-        sensor.AddObservation(distanceBwTarget);
+
+        Vector3 distanceVector = new Vector3(transform.localPosition.x - targetPos.transform.localPosition.x, transform.localPosition.y - targetPos.transform.localPosition.y, transform.localPosition.z - targetPos.transform.localPosition.z);
+        sensor.AddObservation(distanceVector);
+        sensor.AddObservation(distanceVector.magnitude);
     }
     public override void OnActionReceived(ActionBuffers actions)
     {
@@ -49,18 +49,17 @@ public class PlayerAgent : Agent
     {
         if(collision.gameObject.name == "Goal")
         {
-            SetReward(1f);
+            SetReward(10f);
             planeMat.material = success;
             EndEpisode();
         }
         if (collision.gameObject.tag == "Wall")
         {
-            SetReward(-1f);
+            SetReward(-10f);
             planeMat.material = failure;
             EndEpisode();
         }
     }
-
     private void Update()
     {
         previousDistance = Vector3.Distance(gameObject.transform.localPosition, targetPos.localPosition);
@@ -69,16 +68,13 @@ public class PlayerAgent : Agent
     private void LateUpdate()
     {
         float difference = previousDistance - Vector3.Distance(gameObject.transform.localPosition, targetPos.localPosition);
-
         if (difference > 0f)
         {
-            SetReward(.5f);
-            planeMat.material = success;
+            AddReward(1f);
         }
         if (difference < 0f)
         {
-            SetReward(-.5f);
-            planeMat.material = failure;
+            AddReward(-1f);
         }
     }
 }
